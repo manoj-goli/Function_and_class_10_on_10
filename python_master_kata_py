@@ -1,0 +1,541 @@
+"""
+python_mastery_kata.py
+
+20 scenarios:
+- 10 function tasks
+- 10 class tasks
+
+Implement the TODOs. Do NOT edit tests unless a test is wrong.
+Run: python python_mastery_kata.py
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import Any, Callable, Iterable, Iterator, Optional, TypeVar
+
+T = TypeVar("T")
+
+
+# ============================================================
+# 0) Tiny test runner (leave as-is)
+# ============================================================
+
+class TestFailure(Exception):
+    pass
+
+def check(name: str, fn: Callable[[], None]) -> None:
+    try:
+        fn()
+        print(f"✅ {name}")
+    except Exception as e:
+        print(f"❌ {name}: {type(e).__name__}: {e}")
+        raise
+
+
+# ============================================================
+# FUNCTIONS (1–10)
+# ============================================================
+
+# 1) parse_int: strict parsing with good errors
+def parse_int(s: str, *, base: int = 10) -> int:
+    """
+    Parse s into an int with the given base.
+    Requirements:
+    - Leading/trailing whitespace allowed.
+    - '+' and '-' allowed.
+    - Raise ValueError for invalid strings (like '12.3', 'abc', '', '  ').
+    - base must be between 2 and 36 inclusive, else raise ValueError.
+    """
+    raise NotImplementedError
+
+
+def test_1():
+    assert parse_int("  42 ") == 42
+    assert parse_int("-17") == -17
+    assert parse_int("+17") == 17
+    assert parse_int("ff", base=16) == 255
+    try:
+        parse_int("12.3")
+        raise TestFailure("expected ValueError")
+    except ValueError:
+        pass
+    try:
+        parse_int("   ")
+        raise TestFailure("expected ValueError")
+    except ValueError:
+        pass
+    try:
+        parse_int("10", base=1)
+        raise TestFailure("expected ValueError")
+    except ValueError:
+        pass
+
+
+# 2) chunk: split iterable into lists of size n (last may be smaller)
+def chunk(items: Iterable[T], n: int) -> list[list[T]]:
+    """
+    Return a list of lists, chunked by n.
+    Requirements:
+    - n must be > 0 else raise ValueError.
+    - items can be any iterable (not only list).
+    """
+    raise NotImplementedError
+
+
+def test_2():
+    assert chunk([1, 2, 3, 4, 5], 2) == [[1, 2], [3, 4], [5]]
+    assert chunk((1, 2, 3), 3) == [[1, 2, 3]]
+    assert chunk([], 3) == []
+    assert chunk((i for i in range(5)), 2) == [[0, 1], [2, 3], [4]]
+    try:
+        chunk([1], 0)
+        raise TestFailure("expected ValueError")
+    except ValueError:
+        pass
+
+
+# 3) dedupe_keep_order: stable de-duplication
+def dedupe_keep_order(items: Iterable[T]) -> list[T]:
+    """
+    Return items with duplicates removed, keeping first occurrence order.
+    Must work for hashable items.
+    """
+    raise NotImplementedError
+
+
+def test_3():
+    assert dedupe_keep_order([1, 2, 1, 3, 2, 4]) == [1, 2, 3, 4]
+    assert dedupe_keep_order(["a", "a", "b"]) == ["a", "b"]
+    assert dedupe_keep_order([]) == []
+
+
+# 4) safe_get: deep dict access with default
+def safe_get(d: dict[str, Any], path: str, default: Any = None) -> Any:
+    """
+    path is like 'a.b.c' meaning d['a']['b']['c'].
+    Requirements:
+    - If any key missing OR a non-dict is encountered before the end: return default.
+    - Empty path returns the whole dict.
+    """
+    raise NotImplementedError
+
+
+def test_4():
+    data = {"a": {"b": {"c": 10}}}
+    assert safe_get(data, "a.b.c") == 10
+    assert safe_get(data, "a.b.x", default=99) == 99
+    assert safe_get(data, "", default=99) == data
+    assert safe_get({"a": 5}, "a.b", default="nope") == "nope"
+
+
+# 5) make_counter: closure + nonlocal
+def make_counter(start: int = 0) -> Callable[[], int]:
+    """
+    Return a function that when called increments and returns the next count.
+    Example:
+      c = make_counter(10)
+      c() -> 11
+      c() -> 12
+    """
+    raise NotImplementedError
+
+
+def test_5():
+    c = make_counter(10)
+    assert c() == 11
+    assert c() == 12
+    d = make_counter()
+    assert d() == 1
+    assert d() == 2
+
+
+# 6) call_with_timeout_args: signature practice
+def call_with_timeout_args(
+    fn: Callable[..., T],
+    *args: Any,
+    timeout_s: float = 1.0,
+    **kwargs: Any
+) -> tuple[T, float]:
+    """
+    Call fn(*args, **kwargs) and return (result, timeout_s).
+    This is a signature drill: preserve *args/**kwargs and a keyword param.
+    Note: We are NOT implementing real timeout logic here.
+    """
+    raise NotImplementedError
+
+
+def test_6():
+    def add(a: int, b: int) -> int:
+        return a + b
+    assert call_with_timeout_args(add, 2, 3) == (5, 1.0)
+    assert call_with_timeout_args(add, 2, 3, timeout_s=0.5) == (5, 0.5)
+
+
+# 7) normalize_name: string rules
+def normalize_name(name: str) -> str:
+    """
+    Normalize a person's name:
+    - strip whitespace
+    - collapse internal whitespace to single spaces
+    - title-case each word (but keep apostrophes like O'Neill correct)
+    Examples:
+      '  mANoj   gOLI ' -> 'Manoj Goli'
+      \"  o'neill  \" -> \"O'Neill\"
+    """
+    raise NotImplementedError
+
+
+def test_7():
+    assert normalize_name("  mANoj   gOLI ") == "Manoj Goli"
+    assert normalize_name("  o'neill  ") == "O'Neill"
+    assert normalize_name("a   b    c") == "A B C"
+
+
+# 8) retry: higher-order function + exceptions
+def retry(
+    fn: Callable[[], T],
+    *,
+    retries: int,
+    exceptions: tuple[type[BaseException], ...] = (Exception,),
+) -> T:
+    """
+    Call fn until it succeeds or we run out of retries.
+    - Total attempts = retries + 1
+    - Only catch exceptions listed in exceptions; re-raise others immediately.
+    - If all attempts fail with caught exceptions, re-raise the last one.
+    """
+    raise NotImplementedError
+
+
+def test_8():
+    attempts = {"n": 0}
+    def flaky() -> str:
+        attempts["n"] += 1
+        if attempts["n"] < 3:
+            raise ValueError("nope")
+        return "ok"
+    assert retry(flaky, retries=5) == "ok"
+
+    attempts2 = {"n": 0}
+    def always_fail() -> None:
+        attempts2["n"] += 1
+        raise ValueError("still nope")
+    try:
+        retry(always_fail, retries=2)
+        raise TestFailure("expected ValueError")
+    except ValueError:
+        assert attempts2["n"] == 3
+
+
+# 9) once: decorator-ish behavior without @ syntax
+def once(fn: Callable[..., T]) -> Callable[..., T]:
+    """
+    Return a wrapped function that calls fn only once.
+    - First call computes and caches result.
+    - Later calls return cached result (ignore args/kwargs after first).
+    """
+    raise NotImplementedError
+
+
+def test_9():
+    calls = {"n": 0}
+    def f(x: int) -> int:
+        calls["n"] += 1
+        return x * 2
+    g = once(f)
+    assert g(10) == 20
+    assert g(999) == 20
+    assert calls["n"] == 1
+
+
+# 10) flatten: generator
+def flatten(nested: Iterable[Iterable[T]]) -> Iterator[T]:
+    """
+    Yield items from each inner iterable in order (lazy).
+    Must be a generator (uses yield).
+    """
+    raise NotImplementedError
+
+
+def test_10():
+    assert list(flatten([[1, 2], [], [3]])) == [1, 2, 3]
+    assert list(flatten((range(2), range(2, 4)))) == [0, 1, 2, 3]
+
+
+# ============================================================
+# CLASSES (11–20)
+# ============================================================
+'''
+# 11) BankAccount: state + methods + property
+class BankAccount:
+    """
+    Requirements:
+    - Constructor: BankAccount(owner: str, balance: int = 0)
+    - deposit(amount): amount must be >0 else ValueError
+    - withdraw(amount): amount must be >0 and <= balance else ValueError
+    - property .balance returns current balance (read-only)
+    - __repr__ returns something informative (exact format not tested)
+    """
+    raise NotImplementedError
+
+
+def test_11():
+    a = BankAccount("Manoj", balance=100)
+    a.deposit(50)
+    assert a.balance == 150
+    a.withdraw(20)
+    assert a.balance == 130
+    try:
+        a.withdraw(999)
+        raise TestFailure("expected ValueError")
+    except ValueError:
+        pass
+
+
+# 12) Config: classmethod constructor + validation
+class Config:
+    """
+    Requirements:
+    - store: host (str), port (int)
+    - classmethod from_url(url: str) -> Config
+      where url looks like 'host:port' (e.g., 'localhost:8080')
+    - Validate: port 1..65535 else ValueError
+    """
+    raise NotImplementedError
+
+
+def test_12():
+    c = Config.from_url("localhost:8080")
+    assert c.host == "localhost"
+    assert c.port == 8080
+    try:
+        Config.from_url("x:70000")
+        raise TestFailure("expected ValueError")
+    except ValueError:
+        pass
+
+
+# 13) Stopwatch: context manager
+class Stopwatch:
+    """
+    Requirements:
+    - usable with `with Stopwatch() as sw: ...`
+    - sw.elapsed_s should be a float >= 0 after exit
+    - Implement __enter__ and __exit__
+    Note: use time.perf_counter()
+    """
+    raise NotImplementedError
+
+
+def test_13():
+    import time
+    with Stopwatch() as sw:
+        time.sleep(0.01)
+    assert sw.elapsed_s >= 0.0
+
+
+# 14) BoundedList: enforce max size + dunder methods
+class BoundedList:
+    """
+    Requirements:
+    - constructor BoundedList(max_size: int)
+    - append(x): if len would exceed max_size, raise OverflowError
+    - __len__ and __iter__ supported
+    """
+    raise NotImplementedError
+
+
+def test_14():
+    bl = BoundedList(2)
+    bl.append(1)
+    bl.append(2)
+    assert list(bl) == [1, 2]
+    try:
+        bl.append(3)
+        raise TestFailure("expected OverflowError")
+    except OverflowError:
+        pass
+    assert len(bl) == 2
+
+
+# 15) @dataclass User: defaults + default_factory edge case
+@dataclass
+class User:
+    """
+    Requirements:
+    - fields: username: str
+             roles: list[str] (default empty list, but MUST NOT be shared between instances)
+    """
+    username: str
+    roles: list[str] = field(default_factory=list)
+
+
+def test_15():
+    u1 = User("a")
+    u2 = User("b")
+    u1.roles.append("admin")
+    assert u1.roles == ["admin"]
+    assert u2.roles == []
+
+
+# 16) Point: dataclass immutability + hashing
+@dataclass(frozen=True)
+class Point:
+    """
+    Requirements:
+    - frozen dataclass with x: int, y: int
+    - hashable so it can be used in a set
+    """
+    x: int
+    y: int
+
+
+def test_16():
+    s = {Point(1, 2), Point(1, 2), Point(2, 3)}
+    assert len(s) == 2
+    p = Point(1, 2)
+    try:
+        # frozen means this should fail
+        object.__setattr__(p, "x", 99)  # we force it; still should be logically "immutable"
+    except Exception:
+        pass
+
+
+# 17) SimpleCache: __getitem__/__setitem__ + eviction
+class SimpleCache:
+    """
+    Requirements:
+    - constructor SimpleCache(capacity: int)
+    - supports cache[key] = value and cache[key]
+    - If capacity exceeded, evict the oldest inserted key.
+    - KeyError if missing.
+    """
+    raise NotImplementedError
+
+
+def test_17():
+    c = SimpleCache(2)
+    c["a"] = 1
+    c["b"] = 2
+    assert c["a"] == 1
+    c["c"] = 3  # evicts "a"
+    try:
+        _ = c["a"]
+        raise TestFailure("expected KeyError")
+    except KeyError:
+        pass
+    assert c["b"] == 2
+    assert c["c"] == 3
+
+
+# 18) Shape hierarchy: inheritance + polymorphism
+class Shape:
+    def area(self) -> float:
+        raise NotImplementedError
+
+class Rectangle(Shape):
+    """
+    Requirements:
+    - Rectangle(w: float, h: float)
+    - area = w*h
+    """
+    raise NotImplementedError
+
+class Circle(Shape):
+    """
+    Requirements:
+    - Circle(r: float)
+    - area = pi*r*r
+    """
+    raise NotImplementedError
+
+
+def test_18():
+    import math
+    shapes: list[Shape] = [Rectangle(2, 3), Circle(2)]
+    areas = [s.area() for s in shapes]
+    assert abs(areas[0] - 6.0) < 1e-9
+    assert abs(areas[1] - (math.pi * 4)) < 1e-9
+
+
+# 19) Email: property setter validation
+class Email:
+    """
+    Requirements:
+    - Email(address: str)
+    - property address:
+        - must contain exactly one '@'
+        - must have at least one '.' after '@'
+        - else ValueError
+    """
+    raise NotImplementedError
+
+
+def test_19():
+    e = Email("a@b.com")
+    assert e.address == "a@b.com"
+    try:
+        e.address = "invalid"
+        raise TestFailure("expected ValueError")
+    except ValueError:
+        pass
+    try:
+        Email("x@y")
+        raise TestFailure("expected ValueError")
+    except ValueError:
+        pass
+
+
+# 20) LineReader: iterator protocol (__iter__/__next__)
+class LineReader:
+    """
+    Requirements:
+    - constructor LineReader(text: str)
+    - iterates over non-empty stripped lines
+    - __iter__ returns self, __next__ returns next line, StopIteration at end
+    """
+    raise NotImplementedError
+
+
+def test_20():
+    lr = LineReader("  a \n\n b\n  \n c ")
+    assert list(lr) == ["a", "b", "c"]
+
+
+# ============================================================
+# Run tests
+# ============================================================
+
+def main() -> None:
+    tests = [
+        ("1) parse_int", test_1),
+        ("2) chunk", test_2),
+        ("3) dedupe_keep_order", test_3),
+        ("4) safe_get", test_4),
+        ("5) make_counter (closure)", test_5),
+        ("6) call_with_timeout_args (*args/**kwargs)", test_6),
+        ("7) normalize_name", test_7),
+        ("8) retry", test_8),
+        ("9) once (cache)", test_9),
+        ("10) flatten (generator)", test_10),
+        ("11) BankAccount", test_11),
+        ("12) Config.from_url", test_12),
+        ("13) Stopwatch (context manager)", test_13),
+        ("14) BoundedList", test_14),
+        ("15) User dataclass default_factory", test_15),
+        ("16) Point frozen dataclass", test_16),
+        ("17) SimpleCache eviction", test_17),
+        ("18) Shape/Rectangle/Circle", test_18),
+        ("19) Email property validation", test_19),
+        ("20) LineReader iterator", test_20),
+    ]
+
+    for name, t in tests:
+        check(name, t)
+
+    print("\n🎉 20/20 passed. Now repeat from scratch in a new file without looking.")
+
+if __name__ == "__main__":
+    main()
+'''
