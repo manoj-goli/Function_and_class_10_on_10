@@ -1,0 +1,151 @@
+# Input
+# 2024-11-11 13:04 open account1 with 0
+# 2024-11-11 13:05 deposit to account1 500
+# 2024-11-16 11:04 open account2 with 0
+# 2024-11-16 11:07 open account3 with 0
+# 2024-11-16 11:09 open account4 with 0
+# 2024-12-01 09:03 transfer account1 to account2 100
+# 2024-12-01 09:04 transfer account1 to account3 100
+# 2024-12-01 09:05 transfer account1 to account4 100
+# 2024-12-01 09:07 transfer account4 to account1 10
+# 2024-12-21 09:50 withdraw account1 50
+
+# Output
+# balance of account1 is 240
+# balance of to is 500
+# balance of account2 is -100
+# balance of account3 is -100
+# balance of account4 is -90
+
+
+
+# Code snippet
+import sys
+
+
+def update_accounts(accounts, transaction):
+    type = transaction[2]
+    acc = transaction[3]
+    ac2 = transaction[-2]
+    amt = int(transaction[-1])
+
+    if type == "open":
+        accounts[acc] = amt
+        return
+
+    if type == "deposit":
+        if acc in accounts:
+            accounts[acc] = accounts[acc] + amt
+        else:
+            accounts[acc] = amt
+        return
+
+    if type == "withdraw":
+        accounts[acc] = accounts[acc] - amt
+        return
+
+    if type == "transfer":
+        accounts[acc] = accounts[acc] + amt
+        accounts[ac2] = accounts[ac2] - amt
+
+
+def main(argv):
+    if len(argv) != 1:
+        raise AttributeError("wrong number of command-line arguments.")
+
+    accounts = {}
+
+    with open(argv[0], "r") as f:
+        for line in f:
+            update_accounts(accounts, line.split())
+
+    for key in accounts:
+        print("balance of " + key + " is " + str(accounts[key]))
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
+
+
+----end of program----
+
+This is for interview (guidance from the Recruiters)
+Round 1: Technical Assessment - in your preferred coding language Python
+
+Role: Technical Solutions Engineer (TSE)
+The Mission: Acting as a deep technical investigator, diving into existing systems and codebases to diagnose the root cause of urgent failures.
+The Format: Applied Code Comprehension You will be presented with a scenario (e.g., a buggy code snippet or a failing system) and asked to analyze it. Use this 5-step troubleshooting process:
+Scoping Questions: Understand the system’s current state vs. expected behavior before diagnosing.
+
+System-Level Metrics: Identify the bottleneck. Is it CPU, memory, network, or storage? Use math to validate if a component is overloaded.
+
+Trace Interactions: Trace a user request from the load balancer to the database. Show you understand how the storage model impacts performance.
+
+Identify Failure Patterns: Explain what the pattern suggests (e.g., a connectivity issue vs. a processing bottleneck).
+
+Evaluate Trade-offs (Systems Thinking): Connect the failure to original design choices. For example: "If the system prioritizes consistency, what failures is it now susceptible to?"
+
+What the Interviewer is Looking For:
+Bug/Fix Identification: Can you find all bugs and propose clear fixes?
+
+Proactive Improvement: Are you suggesting ways to refactor for better long-term health?
+
+Performance Rationalization: Can you use O-notation to justify proposed changes?
+
+Universal Success Tips:
+Think Out Loud: This is not a silent test. Narrate your work, your assumptions, and your decisions continuously.
+
+Technical Precision: Use industry terminology correctly. If you are unsure of a term, ask for clarification—don't guess.
+
+The 4-Step Problem Solving Method:
+Understand: Ask clarifying questions to define constraints and ambiguities.
+Plan: Discuss multiple potential solutions/causes and their trade-offs. Justify why you chose one.
+Propose: Present your answer (Clean code for CPSE; Root cause/fix for TSE).
+Validate: Articulate how you would test your solution and account for edge cases. 
+
+---
+
+I am beginner in programming and I was trying to follow a mental model of ...
+
+1. Checking what are the input and output data types
+2. Intent of the code
+3. Happy path
+4. Bug fixes 
+5. Edge cases
+6. Optimize if I can
+
+for this code reading / code comprehension interview. As you seen the difficulty is of 4/10 and uses import's like sys, import urllib.request etc which may relevant to TSE role. However, my mental model may quickly fall apart in the code snippets like one given above. 
+
+
+By looking at the buggy code, it will have 
+
+- 1 major bug
+- 1 logic error
+- 1 edge case scenario where the code can break
+- And with some room to optimize 
+
+
+
+I am still a beginner in programming, I have couple of days of time to ramp up. Train me with code snippets and provide me to the point feedback as well as rating on my effort on a scale of 1(poor) to 10 (good). Right now I am doing mental iterations for each values and this approach is not scalable if I have more input lines or more iteration to perform.
+ 
+
+Lets start practicing snippets with more lines of input like 10 or 2 working functions (like main and helper function) like the above code with various TSE scenarios one by one. 
+
+Once you given me a code snippet, confirm my my final response of each snippet with me, so take my confirmation and provide feedback. Between the snippet and to my final response submission, you act as interviewer to my clarification/scoping questions. 
+
+
+You question or code snippet should contain:
+step 1:
+Sample input and output (commented)  
+Code snippet with similar length and difficulty to the above provided sample snippet 
+
+step 2:
+Once you gave me the question, you have to be ready to answer my clarification questions without revealing explicit answers
+
+step 3: Confirm my final response with me and provide feedback and tips on how to improve. Short and to the point feedback.
+
+
+We already did one problem and lets do one more with another scenario or py libraries related to TSE . Keep up the difficulty levels similar to the code snippet above
+
+
+If the code snippet above is 4/10, lets start out practice with 5/10. Think yourself as an interviewer and im interviewee for TSE role. This doesnt have to be on banking/accounts.
