@@ -1,0 +1,83 @@
+From a week till yesterday I was preparing for a code comprehension / code reading interview for a Technical Solutions Engineer role (TSE).
+However, my next interview with another company warner bros / CNN is an actual code writing interview with codepad.  More info below about the new role and new interview.
+
+---
+
+After week of practicing code-comprehension this I started from scratch of learning python to below level.
+import sys
+
+def parse_pct(tok):
+    # tok like "cpu=80%"
+    return tok.split("=")[1].replace("%", "")  # returns string -->"80", "95", "95"
+
+def analyze(lines, threshold_pct): #--> str,str
+    total_cpu = 0 #int
+    samples = 0 #int
+    cpu_by_host = {} #empty dict
+
+    for line in lines:
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+
+        parts = line.split()
+        #parts = ["","",""]
+        # web-1 cpu=80% mem=60%
+        # web-2 cpu=95% mem=70%
+        # db-1 cpu=95% mem=85%
+
+        host = parts[0] #/1/ web-1 /2/ web-2 /3/ db-1
+        cpu_tok = parts[1] # /1/"cpu=80%"  /2/ "cpu=95%""  /3/ "cpu=95%""
+        cpu = int(parse_pct(cpu_tok)) #converted to int
+
+        total_cpu += cpu #/1/ 80 /2/80+95  /3/ 80+95+95  /4/....--> 705
+        samples += 1 # /1/1  /2/ each line is each sample----------> 10
+
+        cpu_by_host[host] = cpu #{"web-1":80, "web-2":95, "db-1":95}
+
+    avg_cpu = total_cpu / samples #705/10 = 70.5
+
+    top2 = sorted(cpu_by_host.items(), key=lambda kv: (-kv[1], kv[0]))[:2] # ("web-1":80) ("web-2":95)--> -95 , tie break alphabetically #first two results
+    #{"api-1": 95, "db-1": 95}
+    is_alert = avg_cpu > float(threshold_pct) #70.5 > 70--> True
+    return is_alert, avg_cpu, top2, samples, cpu_by_host #True, 70.5, {"api-1": 95, "db-1": 95}, 10, {"web-1":80, "web-2":95, "db-1":95.....so on}
+
+def main(argv):
+    if len(argv) != 2: #we are expecting 2 args if not raise valueerror
+        raise ValueError("usage: cpumon.py <snapshot_file> <threshold_pct>")
+
+    path = argv[0] #" "-->str
+    threshold = argv[1] #" "--> str 
+
+    with open(path) as f: #this should be in try/except blocks where code can raise exception for FileNotFound or permission related errors
+        is_alert, avg_cpu, top2, samples, cpu_by_host = analyze(f, threshold)
+        #True, 70.5, {"api-1": 95, "db-1": 95}, 10, {"web-1":80, "web-2":95, "db-1":95.....so on}
+
+    if is_alert:
+        print(f"ALERT: avg_cpu_pct={avg_cpu:.1f} threshold_pct={threshold} samples={samples}")
+        #ALERT: avg_cpu_pct=70.5 threshold_pct=70 samples=10
+    else:
+        print(f"OK: avg_cpu_pct={avg_cpu:.1f} threshold_pct={threshold} samples={samples}")
+
+    print("top2_hottest:")
+    for host, cpu in top2:
+        print(f"- {host} cpu_pct={cpu}")
+        # - api-1 cpu_pct=95
+        # - db-1 cpu_pct=95
+
+if __name__ == "__main__":
+    main(sys.argv[1:]) #slice the file name and take the rest of the args
+    #Edge case 1: If the line format is wrong or malformed, code crashed because its all hardcoded
+
+
+----
+However, the above is code-comprehension and related to TSE role, now I have to transition my preparation to Software developer role focusing on JD with almost no experience in writing code logically.
+I am finding it hard to think logically to write a program. 
+
+About the Software Engineer II role: Your New Role... With deep domain expertise, advanced technical capabilities, and a proven track record of successful collaborations, the AI Enablement C Machine Learning team at CNN is accelerating our digital transformation through strategic applications of machine learning and AI technologies. Our current products include popular, related and personalized content recommendations, contextual ad targeting, and site search-serving millions of CNN users via CNN web and mobile apps. Within the next quarter, we will be launching summarization and classification features with chat to follow early next year. We have a variety of specializations and collaborate closely, enhancing our platform and adding to the suite of machine learning features running on it. Machine learning engineers (MLEs) build models and features Data engineers fulfill the availability and latency requirements provided by MLEs Some software engineers partner with MLEs to operationalize and expose models and features Other software engineers focus on our ML platform and tooling, including A/B testing Here are some of the key challenges the team will tackle in next couple of quarters: Content Summaries: Support testing and adoption of various types of content summaries from multiple domains, which can be leveraged in consumer experiences along with embedding generation and classification Two-Tower Experimentation: Explore options for incorporating additional user context in our personalized recommendations model such as geolocation, time of day and time of year All Access Search: Partner with teams across CNN to design and build a roadmap for CNN streaming content search Bandit Foundation: Enhance data access and begin experimenting with bandits for online ranking of recommendations Optimize Site Performance: Dynamically deliver personalized content alongside cached assets, improving load times and enhancing user experience with features like page-level deduplication Your Role Accountabilities... As a Software Engineer II, you will have many opportunities to collaborate with other engineers across the team Promote an inclusive and supportive engineering culture on the team Solve business problems with simple and straightforward solutions Strive for operational excellence--building highly available, low latency, and efficient software with support from other engineers Build subject matter expertise related to multiple production systems Communicate effectively—through progress updates, timely requests for support, demos, and technical documentation Author, test, review, and optimize production-quality code, following best practices for IaC, version control, and continuous delivery with support from other engineers Be passionate about software engineering with a strong sense of responsibility for the code you and your team write, delivering high-quality results that improve with each iteration Embrace failure as a learning opportunity—use research and experimentation to choose the best solutions that meet business goals, moving autonomously from proof-of-concept to production release Qualifications & Experience... Related professional or industry experience Bachelor's degree in computer science or a related technical field Proficiency in Python and one or more of: Golang, Java, C++, or similar object- oriented languages The Nice to Haves Expertise in backend engineering with distributed systems and data-intensive applications at web scale Prior experience working on a machine learning team ---- For this role this is not exactly a ML E role or AI E role but a software engineer role thats responsible for, Some software engineers partner with MLEs to operationalize and expose models and features Other software engineers focus on our ML platform and tooling, including A/B testing , the first interview is on code-pad: Skill: Proactive Problem Solving (Coding)
+---
+
+Now help me start practicing with small reps and help me think like a good programmer by giving the info/concepts I need to learn while working respective goal/snippet.
+On a scale of 1 to 10 difficultly, lets start practicing and training with difficulty 0/10. Once you gave me the question, you have to be ready to answer my clarification questions without revealing explicit answers. I may ask clarification questions as this is a collaborative type of interview. I will comment my code to let you know about my thinking. Confirm my final response with me and provide feedback and tips on how to improve. Short and to the point feedback.
+
+
