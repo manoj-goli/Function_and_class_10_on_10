@@ -1,0 +1,42 @@
+Cluster Architecture & Control Plane Health: 
+1. Life of a request (both from data plane and from kubectl request) - had my first read but definetly needs to solidify and plus, do more revise. 
+2. Health issues in management layer (API server, Datastore/etcd, LB) 
+3. Principles of non-disruptive maintenance 
+
+Workload Reliability & Networking 
+1. Systematic debugging of applications 
+2. Trace the request through network path (inlcuding DNS & internal processes) 
+3. Common failure patterns where containers fail (start, pull images, pass health checks) 
+
+Governance, Isolation & Multi-Tenancy 
+1. Managing shared resources (using boundaries like CPU/MEM limits) 
+2. Isolating specific workloads onto dedicated server groups 
+3. Access policies 
+
+Scalability & System Design 
+1. Architect for massive scale and resilience (multi-region failover, horizontal vs vertical interact, identifying critical data to recover from total data outage 
+
+Technical Foundations 
+1. VMs vs Containers 
+2. Linux features that provide actual isolation and resource boundaries for your workloads 
+
+- Lets focus on vanilla Kubernetes instead of GKE. 
+-Lets do mock sample questions.
+- Difficulty should be equal to the below sample questions.
+
+Sample questions for the interview: 
+Sample Question 1: GKE Autoscaling & Resource Optimization The Scenario: Your application on GKE experiences significant traffic spikes during peak hours. You need to ensure the application stays responsive while also minimizing costs during off-peak times. The Question: How would you coordinate the Cluster Autoscaler (CA), Horizontal Pod Autoscaler (HPA), and Vertical Pod Autoscaler (VPA)? Specifically, what infrastructure signals does each component monitor, and how do they work together to ensure there is enough compute capacity for your pods without wasting resources? What to Look For: A strong candidate will explain that HPA scales the number of pods based on metrics like CPU usage, while CA adds or removes nodes from the cluster when pods cannot be scheduled due to insufficient resources.
+
+ Sample Question 2: GKE Control Plane & Connectivity The Scenario: A customer reports that all kubectl commands against their GKE cluster are timing out. No changes have been made to the cluster configuration recently. The Question: Outline your step-by-step troubleshooting plan to restore access. How would you investigate the GKE Control Plane, the Load Balancer, and the network path between the client and the API server to identify the root cause? 
+
+What to Look For: The candidate should demonstrate a structured approach, checking if the issue is local (e.g., authentication tokens), network-related (e.g., firewall rules or load balancer health), or a failure in the managed control plane itself (e.g., the API server or the underlying datastore). You should be prepared to discuss the intersection of Kubernetes and Google Cloud services, such as how IAM interacts with RBAC and how GKE handles managed components like the control plane and node pools.
+
+Preparation Tip: For hypothetical scenarios, use the STAR method (Situation, Task, Action, Result). Focus most of your time on the specific Actions you took and the data-driven Results of those actions.
+
+- Though the sample questions are about GKE, lets focus on kubernetes. But with same difficulty as sample questions.
+- This is for TSE role interview for kubernetes domain
+
+1. I want you to be my interviewer and post the scenario based mock question.
+2. I will or may ask few clarification questions. Answer to the point to my clarification questions, without revealing much hints or answers. Answer short and to the point as a interviewer
+3. After that I will share my final response.
+4. Confirm my final response, after confirmation Evaluate and give me brief to the point feedback. Rate my answer from 1 to 10 (10 is excellent). Areas to improvise. Topics I need to skim through from my pdf books like Kubernetes in Action, Kubernetes up and running, Kubernetes patterns. (brief and to the point)
